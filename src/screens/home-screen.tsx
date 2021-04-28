@@ -4,6 +4,7 @@ import * as React from 'react'
 import { getIdFromUrl } from 'src/utils'
 
 async function getPokemons<T>(url: string, cb: (data: T, error) => void) {
+  if (!url) return
   let data: T = null
   let error = null
   try {
