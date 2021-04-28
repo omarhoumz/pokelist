@@ -3,70 +3,86 @@ import * as React from 'react'
 
 import { getIdFromUrl } from 'src/utils'
 
-async function getPokemons<T>(url: string, cb: (data: T, error) => void) {
+async function getPokemons(dispatch: React.Dispatch<any>, url: string) {
   if (!url) return
-  let data: T = null
-  let error = null
+  dispatch({ type: ACTIONS.CALL_API })
   try {
-    data = await (await fetch(url)).json()
-  } catch (e) {
-    error = e
+    const data: PokemonData = await (await fetch(url)).json()
+    const { results: pokemons, next: nextUrl, previous: prevUrl } = data
+    dispatch({ type: ACTIONS.SUCCESS, pokemons, nextUrl, prevUrl })
+  } catch (error) {
+    dispatch({ type: ACTIONS.CALL_API, error })
   }
-  cb(data, error)
 }
 
-type PokemonData = {
-  results: any[]
-  next: string | null
+const ACTIONS = {
+  CALL_API: 'call-api',
+  SUCCESS: 'success',
+  ERROR: 'error',
 }
 
-export default function HomeScreen() {
-  const [{ pokemons, nextUrl, error }, setState] = React.useState({
-    pokemons: null,
-    nextUrl: null,
-    error: null,
-  })
-  const [pageNumber, setPageNumber] = React.useState(0)
+function pokemonsReducer(state: StateType, action): StateType {
+  switch (action.type) {
+    case ACTIONS.CALL_API: {
+      return { ...state, loading: true }
+    }
 
-  function updatePokemonData(data: PokemonData, error) {
-    const { results, next } = data
-    setState(({ pokemons }) => ({
-      pokemons: [...(pokemons ?? []), ...results],
-      nextUrl: next,
-      error,
-    }))
+    case ACTIONS.SUCCESS: {
+      const { pokemons, nextUrl, prevUrl } = action
+      return {
+        ...state,
+        error: null,
+        pokemons,
+        nextUrl,
+        prevUrl,
+        loading: false,
+      }
+    }
+
+    case ACTIONS.ERROR: {
+      return { ...state, error: action.error, pokemons: null, loading: false }
+    }
+
+    default: {
+      throw new Error(`Unhadled action type (ts says this is a never case)`)
+    }
   }
+}
+
+const initialState: StateType = {
+  pokemons: null,
+  nextUrl: null,
+  prevUrl: null,
+  error: null,
+  loading: true,
+}
+
+export default function Home2() {
+  const [state, dispatch] = React.useReducer(pokemonsReducer, initialState)
+  const { pokemons, loading, error, nextUrl, prevUrl } = state
 
   React.useEffect(() => {
-    getPokemons<PokemonData>(
-      'https://pokeapi.co/api/v2/pokemon',
-      updatePokemonData,
-    )
+    getPokemons(dispatch, 'https://pokeapi.co/api/v2/pokemon')
   }, [])
 
-  React.useEffect(() => {
-    getPokemons(nextUrl, updatePokemonData)
-  }, [pageNumber])
-
-  function handleClick() {
-    setPageNumber((n) => n + 1)
+  if (loading) {
+    return <div>Loading ...</div>
   }
 
   if (error) {
     return <div>An error occured</div>
   }
 
-  if (!pokemons) {
-    return <div>Loading ...</div>
+  function handlePrevClick() {
+    getPokemons(dispatch, prevUrl)
+  }
+
+  function handleNextClick() {
+    getPokemons(dispatch, nextUrl)
   }
 
   return (
     <div>
-      <h1>Poke List</h1>
-      <h2>Home</h2>
-      <p>Showing {pokemons.length} pokemons</p>
-      <p>Page number: {pageNumber + 1}</p>
-
       <ul>
         {pokemons.map((pokemon) => {
           return (
@@ -79,8 +95,12 @@ export default function HomeScreen() {
         })}
       </ul>
 
-      <button onClick={handleClick} type="button">
-        Load more
+      <button onClick={handlePrevClick} type="button" disabled={!prevUrl}>
+        Previous Page
+      </button>
+
+      <button onClick={handleNextClick} type="button" disabled={!nextUrl}>
+        Next Page
       </button>
     </div>
   )
