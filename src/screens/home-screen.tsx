@@ -83,12 +83,14 @@ export default function Home2() {
 
   return (
     <div>
-      <ul>
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-5">
         {pokemons.map((pokemon) => {
           return (
             <li key={pokemon.url}>
               <Link href={`/pokemon${getIdFromUrl(pokemon.url)}`}>
-                <a>{pokemon.name}</a>
+                <a className="block p-4 bg-blue-200 text-blue-700 text-3xl font-bold capitalize rounded shadow transition-shadow duration-300 hover:shadow-lg focus:shadow-lg focus:outline-none">
+                  {pokemon.name}
+                </a>
               </Link>
             </li>
           )
