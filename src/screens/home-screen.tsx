@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import * as React from 'react'
 
-import { getIdFromUrl } from 'src/utils'
+import { LoadingCards } from '@/components/loading-cards'
+import Pokemons from '@/components/pokemons'
 
 async function getPokemons(dispatch: React.Dispatch<any>, url: string) {
   if (!url) return
@@ -65,10 +65,6 @@ export default function Home2() {
     getPokemons(dispatch, 'https://pokeapi.co/api/v2/pokemon')
   }, [])
 
-  if (loading) {
-    return <div>Loading ...</div>
-  }
-
   if (error) {
     return <div>An error occured</div>
   }
@@ -84,26 +80,32 @@ export default function Home2() {
   return (
     <div>
       <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-5">
-        {pokemons.map((pokemon) => {
-          return (
-            <li key={pokemon.url}>
-              <Link href={`/pokemon${getIdFromUrl(pokemon.url)}`}>
-                <a className="block p-4 bg-blue-200 text-blue-700 text-3xl font-bold capitalize rounded shadow transition-shadow duration-300 hover:shadow-lg focus:shadow-lg focus:outline-none">
-                  {pokemon.name}
-                </a>
-              </Link>
-            </li>
-          )
-        })}
+        {loading ? (
+          <LoadingCards repeat={20} />
+        ) : (
+          <Pokemons pokemons={pokemons} />
+        )}
       </ul>
 
-      <button onClick={handlePrevClick} type="button" disabled={!prevUrl}>
-        Previous Page
-      </button>
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={handlePrevClick}
+          type="button"
+          disabled={loading || !prevUrl}
+          className="cursor-pointer px-4 py-2 hover:bg-gray-200 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Previous Page
+        </button>
 
-      <button onClick={handleNextClick} type="button" disabled={!nextUrl}>
-        Next Page
-      </button>
+        <button
+          onClick={handleNextClick}
+          type="button"
+          disabled={loading || !nextUrl}
+          className="cursor-pointer px-4 py-2 hover:bg-gray-200 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next Page
+        </button>
+      </div>
     </div>
   )
 }

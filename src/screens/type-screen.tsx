@@ -1,3 +1,5 @@
+import { LoadingCards } from '@/components/loading-cards'
+import Pokemons from '@/components/pokemons'
 import Link from 'next/link'
 import * as React from 'react'
 
@@ -12,6 +14,7 @@ export default function TypeScreen({ tid }: IProps) {
     moves: [],
     pokemon: [],
   })
+  const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
     async function getType() {
@@ -26,34 +29,37 @@ export default function TypeScreen({ tid }: IProps) {
       }
 
       setTypeData(poke)
+      setLoading(false)
     }
 
     getType()
   }, [])
 
+  if (loading) {
+    return loadingElement
+  }
+
   return (
-    <div>
-      <h1 style={{ textTransform: 'capitalize' }}>{typeData.name}</h1>
+    <>
+      <span className="uppercase text-sm font-black">type</span>
+      <h1 className="capitalize text-3xl font-light leading-none mb-4">
+        {typeData.name}
+      </h1>
 
-      <h2>Pokemons</h2>
-      <ul>
-        {typeData.pokemon.map((pokemon) => {
-          return (
-            <li key={pokemon.url}>
-              <Link href={`/pokemon${getIdFromUrl(pokemon.url)}`}>
-                <a>{pokemon.name}</a>
-              </Link>
-            </li>
-          )
-        })}
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-5">
+        <Pokemons pokemons={typeData.pokemon} />
       </ul>
-
-      <h2>Moves</h2>
-      <ul>
-        {typeData.moves.map((move) => (
-          <li key={move.url}>{move.name}</li>
-        ))}
-      </ul>
-    </div>
+    </>
   )
 }
+
+const loadingElement = (
+  <>
+    <span className="uppercase text-sm font-black">type</span>
+    <div className="h-7 w-40 mb-4 bg-gray-400" />
+
+    <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-5">
+      <LoadingCards repeat={25} />
+    </ul>
+  </>
+)
