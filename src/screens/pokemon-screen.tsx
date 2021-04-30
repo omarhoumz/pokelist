@@ -3,7 +3,16 @@ import * as React from 'react'
 
 import { getIdFromUrl } from 'src/utils'
 
-type IProps = { pid: string }
+function getEvolutionChain(chain) {
+  return chain.reduce((accu, curr) => {
+    const currentSpecie = curr.species
+
+    let childEvolutions =
+      curr.evolves_to.length > 0 ? getEvolutionChain(curr.evolves_to) : []
+
+    return [...accu, currentSpecie, ...childEvolutions]
+  }, [])
+}
 
 async function getPokemon(pid) {
   const url = `https://pokeapi.co/api/v2/pokemon/${pid}/`
@@ -11,10 +20,20 @@ async function getPokemon(pid) {
 
   const speciesUrl = pokeData.species.url
 
+  let evolutionChainUrl = ''
   let color = 'gray'
   try {
     const species = await (await fetch(speciesUrl)).json()
     color = species.color.name
+    evolutionChainUrl = species.evolution_chain.url
+  } catch (error) {
+    console.error(error)
+  }
+
+  let evolutions = []
+  try {
+    const evolutionChain = await (await fetch(evolutionChainUrl)).json()
+    evolutions = getEvolutionChain([evolutionChain.chain])
   } catch (error) {
     console.error(error)
   }
@@ -24,17 +43,20 @@ async function getPokemon(pid) {
     types: pokeData.types.map(({ type }) => type),
     image: pokeData.sprites.other['official-artwork'].front_default,
     color,
+    evolutions,
   }
 
   return pokemon
 }
 
+type IProps = { pid: string }
 export default function PokemonScreen({ pid }: IProps) {
   const [pokemonData, setPokemonData] = React.useState({
     name: '',
     types: [],
     image: '',
     color: '',
+    evolutions: [],
   })
   const [loading, setLoading] = React.useState(true)
 
@@ -43,7 +65,7 @@ export default function PokemonScreen({ pid }: IProps) {
       setPokemonData(pokemon)
       setLoading(false)
     })
-  }, [])
+  }, [pid])
 
   if (loading) {
     return loadingElement
@@ -67,8 +89,32 @@ export default function PokemonScreen({ pid }: IProps) {
         {pokemonData.name}
       </h1>
 
+      <ul>
+        {pokemonData.evolutions.map((evolution) => {
+          const id = getIdFromUrl(evolution.url)
+
+          return (
+            <li key={evolution.url}>
+              <Link href={`/pokemon${id}`}>
+                <a
+                  className={`capitalize text-2xl text-${pokemonData.color}-600 hover:text-${pokemonData.color}-800`}
+                >
+                  {evolution.name}{' '}
+                  {id.substr(1, id.length - 2) !== pid ? null : (
+                    <span className="text-sm text-blue-400">
+                      👈 we are here
+                    </span>
+                  )}
+                </a>
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
+
       <p className="mt-4 mb-2 text-gray-600 text-sm">
-        👇 Check out the other pokemons that share the same type
+        👇 Check out the other pokemons that share the same{' '}
+        <span className="font-bold">type</span>
       </p>
       <ul>
         {pokemonData.types.map((type) => {
@@ -85,8 +131,6 @@ export default function PokemonScreen({ pid }: IProps) {
           )
         })}
       </ul>
-
-      {/* TODO: Display possible pokemon evolutions (clickable). */}
     </>
   )
 }

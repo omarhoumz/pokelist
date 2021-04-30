@@ -26,3 +26,5 @@
 - The UX is okay, but the design can benifit from some work.
 
 - In the home page we only have the name displayed, we can figure out how to get more data (image, color, ...), or use the beta graphql api for more granularity
+
+- Add more typescript types
