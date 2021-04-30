@@ -61,6 +61,7 @@ export default function PokemonScreen({ pid }: IProps) {
   const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
+    setLoading(true)
     getPokemon(pid).then((pokemon) => {
       setPokemonData(pokemon)
       setLoading(false)
