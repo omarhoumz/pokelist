@@ -22,7 +22,7 @@ function getClasses(colors, shades, props) {
     .flat()
 }
 
-const pokeSafeList = getClasses(pokeColors, ['700', '800'], ['text'])
+const pokeSafeList = getClasses(pokeColors, ['600', '700', '800'], ['text'])
 
 module.exports = {
   purge: {
