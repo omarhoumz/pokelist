@@ -22,3 +22,7 @@
   - Use a library for data fetching, example: [`SWR`](https://swr.vercel.app/) or [`React query`](https://react-query.tanstack.com/)
 
 - More e2e tests and unit testing with [`Testing library`](https://testing-library.com/docs/react-testing-library/intro/)
+
+- The UX is okay, but the design can benifit from some work.
+
+- In the home page we only have the name displayed, we can figure out how to get more data (image, color, ...), or use the beta graphql api for more granularity

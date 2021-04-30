@@ -85,6 +85,8 @@ export default function PokemonScreen({ pid }: IProps) {
           )
         })}
       </ul>
+
+      {/* TODO: Display possible pokemon evolutions (clickable). */}
     </>
   )
 }
