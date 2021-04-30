@@ -79,7 +79,10 @@ export default function Home2() {
 
   return (
     <div>
-      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-5">
+      <ul
+        className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-5"
+        data-testid="cards-wrapper"
+      >
         {loading ? (
           <LoadingCards repeat={20} />
         ) : (
@@ -93,6 +96,7 @@ export default function Home2() {
           type="button"
           disabled={loading || !prevUrl}
           className="cursor-pointer px-4 py-2 hover:bg-gray-200 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          data-testid="btn-prev"
         >
           Previous Page
         </button>
@@ -102,6 +106,7 @@ export default function Home2() {
           type="button"
           disabled={loading || !nextUrl}
           className="cursor-pointer px-4 py-2 hover:bg-gray-200 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          data-testid="btn-next"
         >
           Next Page
         </button>
